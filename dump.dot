@@ -1,0 +1,12 @@
+digraph {
+    rankdir=TB;
+    node [shape=Mrecord];
+
+
+    knot_1 [ style=filled, fillcolor="#FFC0C0",  label="{ <data> data\n50 | { <left> left\n30 | <right> right\n60 }} "];
+    knot_2 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data\n30 | { <left> left\n20 | <right> right\n35 }} "];
+    knot_3 [ style=filled, fillcolor="#C0C0FF", label="{ <data> data\n60 | { <left> left\n69 | <right> right\n52 }} "];
+
+    knot_1:<left> -> knot_2;
+    knot_1:<right> -> knot_3;
+}
