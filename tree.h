@@ -18,19 +18,23 @@ typedef enum {
     TREE_MEMORY_ALLOCATION,
     TREE_POINTERS_TRUBBLE,
     TREE_LINKING_TROUBLE,
+    TREE_DELETE_TROUBLE,
+    TREE_OPEN_FILE_TROUBLE,
 } tree_errors_e;
 
-tree_node_s * tree_node_init(int data, tree_node_s *parent);
+tree_node_s * tree_node_init(long int data, tree_node_s *parent);
 tree_errors_e tree_node_delete(tree_node_s *node);
-tree_errors_e link_right_node(int data, tree_node_s *parent);
-tree_errors_e link_left_node(int data, tree_node_s *parent);
-tree_errors_e create_new_node(int data_for_new_node, tree_node_s *root);
+tree_errors_e link_right_node(long int data, tree_node_s *parent);
+tree_errors_e link_left_node(long int data, tree_node_s *parent);
+tree_errors_e delete_tree(tree_node_s *root);
+tree_errors_e create_new_node(long int data_for_new_node, tree_node_s *root);
 // tree_errors_e add_node(int data, tree_node_s *root);
-tree_errors_e node_dump(tree_node_s current_node);
+tree_errors_e node_dump(tree_node_s *current_node);
+tree_errors_e tree_dump(tree_node_s *current_node);
 
 tree_node_s error_node_CONST = {
             .data = 2989,
             .left = NULL,
-            .right = NULL
+            .right = NULL,
             .parent = NULL,
         };

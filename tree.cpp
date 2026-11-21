@@ -1,25 +1,38 @@
 #include "tree.h"
 
 int main() {
-    tree_node_s root = {
-        .data = 50,
-        .left = NULL,
-        .right = NULL,
-        .parent = NULL,
-    };
-    tree_node_s current = root;
+    tree_node_s *root = (tree_node_s *) calloc(1, sizeof(tree_node_s)); 
+    root->data = 50;
+    root->left = NULL;
+    root->parent = NULL;
+    root->right = NULL;
+    
+    tree_node_s *current = root;
 
-    int data_for_new_node = 30;
+    long int data_for_new_node = 30;
 
-    tree_errors_e res_making_new_node = create_new_node(data_for_new_node, &root);
+    tree_errors_e res_making_new_node = create_new_node(data_for_new_node, root);
+    
+    node_dump(current);
+    current = root->right;
+    node_dump(current);
 
     if (res_making_new_node != 0) {
         fprintf(stderr, "ERROR truble with making new node\n\tin main\n");
     }
+    
+    tree_errors_e res_tree_dump = tree_dump(root);
+    if (res_tree_dump != TREE_SUCCESS) {
+        fprintf(stderr, "ERROR trouble with tree dump");
+    }
 
+    tree_errors_e result = delete_tree(root);
+    if (result != TREE_SUCCESS) {
+        fprintf(stderr, "ERROR troublle with deleting tree\n\tin main\n");
+    }
 }
 
-tree_node_s *  tree_node_init(int data, tree_node_s *parent) {
+tree_node_s *  tree_node_init(long int data, tree_node_s *parent) {
     assert(parent && "wrong parent pointer");
 
     tree_node_s *node = (tree_node_s *) calloc(1, sizeof(tree_node_s));
@@ -30,6 +43,7 @@ tree_node_s *  tree_node_init(int data, tree_node_s *parent) {
 
     node->data = data;
     node->parent = parent;
+    // fprintf(stderr, "Done\n");
 
     return node;
 }
@@ -44,19 +58,21 @@ tree_errors_e   tree_node_delete(tree_node_s *node) {
     node->right = NULL;
     node->left = NULL;
 
-    if (node->parent->left == node) {
-        node->parent->left = NULL;
-    }
-    else {
-        node->parent->right = NULL;
+    if (node->parent != NULL) {
+        if (node->parent->left == node) {
+            node->parent->left = NULL;
+        }
+        else {
+            node->parent->right = NULL;
+        }
     }
 
     free(node);
     return TREE_SUCCESS;
 }
 
-tree_errors_e   link_right_node(int data, tree_node_s *current_node) {
-    assert(current_node->parent && "wrong parent pointer");
+tree_errors_e   link_right_node(long int data, tree_node_s *current_node) {
+    //assert(current_node->parent && "wrong parent pointer");
 
     tree_node_s *created_node = tree_node_init(data, current_node);
     if (created_node->data == 2989) {
@@ -65,11 +81,12 @@ tree_errors_e   link_right_node(int data, tree_node_s *current_node) {
     }
 
     current_node->right = created_node;
+    // fprintf(stderr, "Done para\n");
 
     return TREE_SUCCESS;
 }
 
-tree_errors_e   link_left_node(int data, tree_node_s *current_node) {
+tree_errors_e   link_left_node(long int data, tree_node_s *current_node) {
     assert(current_node->parent && "wrong parent pointer");
 
     tree_node_s *created_node = tree_node_init(data, current_node);
@@ -83,7 +100,28 @@ tree_errors_e   link_left_node(int data, tree_node_s *current_node) {
     return TREE_SUCCESS;
 }
 
-tree_errors_e   create_new_node(int data_for_new_node, tree_node_s *current) {
+tree_errors_e delete_tree(tree_node_s *current){
+    assert(current);
+
+    while (current->left != NULL || current->right != NULL) {
+        if (current->left != NULL) {
+            delete_tree(current->left);
+        }
+        if (current->right != NULL) {
+            delete_tree(current->right);
+        }
+    }
+    tree_errors_e res_delete = tree_node_delete(current);
+
+    if (res_delete != TREE_SUCCESS) {
+        fprintf(stderr, "Error: trubble with deleting node\n\tin delete_tree");
+        return TREE_DELETE_TROUBLE;
+    }
+
+    return TREE_SUCCESS;
+}
+
+tree_errors_e   create_new_node(long int data_for_new_node, tree_node_s *current) {
     int f = 0;
     tree_errors_e res_link = TREE_SUCCESS;
 
@@ -117,21 +155,48 @@ tree_errors_e   create_new_node(int data_for_new_node, tree_node_s *current) {
     return TREE_SUCCESS;
 }
 //NOTE: not ready, do not look on while 
+
 tree_errors_e node_dump(tree_node_s *current_node) {
-    FILE *dump_file_pointer = fopen(DUMP_FILE_NAME, "a");
+    FILE *dump_file_pointer = fopen(DUMP_FILE_NAME, "w");
+
     if (dump_file_pointer == NULL) {
         fprintf(stderr, "ERROR truble with openning dump file\n\tin node_dump\n");
         return TREE_POINTERS_TRUBBLE;
     }
 
-    while (current_node->left != NULL) {
-        fprintf(dump_file_pointer, "digraph Tree {\nrankdir=TB;\nnode [shape=Mrecord];\n");
+    int i = 1;
+    long int left;
+    long int right;
 
-        fprintf(dump_file_pointer, "knot_%d [ style=filled, fillcolor=\"#FFC0C0\",  label=\"{ <data> data\n50 | { <left> left\n30 | <right> right\n60 }} \"];\n");
-
-        fprintf(dump_file_pointer, "knot_1:<left> -> knot_2;\nknot_1:<right> -> knot_3;\n}");
+    if (current_node->left != NULL) {
+        left = current_node->left->data;
+    }
+    else {
+        left = 0;
+    }
+    if (current_node->left != NULL) {
+        right = current_node->right->data;
+        fprintf(stderr, "current_node->data = <%d>\n")
+    }
+    else {
+        right = 0;
     }
 
+    fprintf(dump_file_pointer, "digraph {\n\trankdir=TB;\n\tnode [shape=Mrecord];\n\n");
+    fprintf(dump_file_pointer, "\tknot_%d [ style=filled, fillcolor=\"#FFC0C0\",  label=\"{ <data> data %ld | { <left> left %ld | <right> right %ld }} \"];\n", i, current_node->data, left, right);
+    fprintf(dump_file_pointer, "}");
+
+    system("dot -Tsvg dump.dot -o dump_comp.svg");
     return TREE_SUCCESS;
 }
 
+tree_errors_e tree_dump(tree_node_s *current_node) {
+    assert(current_node && "Error in tree dump - zero pointer input");
+
+    FILE *dump_file_pointer = fopen(DUMP_FILE_NAME, "a");
+    if (dump_file_pointer == NULL) {
+        fprintf(stderr, "ERROR: did not open file for graph dump\n");
+        return TREE_OPEN_FILE_TROUBLE;
+    }
+    fprintf("digraph {")
+}
