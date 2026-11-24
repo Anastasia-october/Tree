@@ -16,12 +16,13 @@ int main() {
     node_dump(current);
     current = root->right;
     node_dump(current);
-
+    printf("parent %p, data %ld\n", current->parent, current->data);
+    printf("A\n");
     if (res_making_new_node != 0) {
         fprintf(stderr, "ERROR truble with making new node\n\tin main\n");
     }
     
-    tree_errors_e res_tree_dump = tree_dump(root);
+    tree_errors_e res_tree_dump = wrap_tree_dump(root);
     if (res_tree_dump != TREE_SUCCESS) {
         fprintf(stderr, "ERROR trouble with tree dump");
     }
@@ -30,6 +31,8 @@ int main() {
     if (result != TREE_SUCCESS) {
         fprintf(stderr, "ERROR troublle with deleting tree\n\tin main\n");
     }
+
+    return 0;
 }
 
 tree_node_s *  tree_node_init(long int data, tree_node_s *parent) {
@@ -154,7 +157,6 @@ tree_errors_e   create_new_node(long int data_for_new_node, tree_node_s *current
 
     return TREE_SUCCESS;
 }
-//NOTE: not ready, do not look on while 
 
 tree_errors_e node_dump(tree_node_s *current_node) {
     FILE *dump_file_pointer = fopen(DUMP_FILE_NAME, "w");
@@ -165,6 +167,7 @@ tree_errors_e node_dump(tree_node_s *current_node) {
     }
 
     int i = 1;
+
     long int left;
     long int right;
 
@@ -174,29 +177,98 @@ tree_errors_e node_dump(tree_node_s *current_node) {
     else {
         left = 0;
     }
-    if (current_node->left != NULL) {
+    if (current_node->right != NULL) {
         right = current_node->right->data;
-        fprintf(stderr, "current_node->data = <%d>\n")
+        // fprintf(stderr, "current_node->data = <%d>\n");
+    }
+    else {
+        right = 0;
+    }
+    fprintf(dump_file_pointer, "NODE_DUMP\n");
+    fprintf(dump_file_pointer, "digraph{\n\trankdir=TB;\n\tnode [shape=Mrecord];\n\n");
+    fprintf(dump_file_pointer, "\tknot_%d [ style=filled, fillcolor=\"#FFC0C0\",  label=\"{ <data> data %ld | { <left> left %ld | <right> right %ld }} \"];\n", i, current_node->data, left, right);
+    fprintf(dump_file_pointer, "}");
+    fprintf(dump_file_pointer, "\nEND_OF_NODE_DUMP\n\n\n\n");
+
+    system("dot -Tsvg dump.dot -o dump_comp.svg");
+    fclose(dump_file_pointer);
+    return TREE_SUCCESS;
+}
+
+tree_errors_e one_node_dump(tree_node_s *current_node, FILE *df_ptr, int level) {
+    assert(df_ptr && "ERROR: wrong pointer to dump file in one_node_dump\n");
+    assert(current_node && "ERROR wrong pointer to current_node(root node expected\n)");
+
+    long int left;
+    long int right;
+
+    if (current_node->left != NULL) {
+        left = current_node->left->data;
+    }
+    else {
+        left = 0;
+    }
+
+    if (current_node->right != NULL) {
+        right = current_node->right->data;
     }
     else {
         right = 0;
     }
 
-    fprintf(dump_file_pointer, "digraph {\n\trankdir=TB;\n\tnode [shape=Mrecord];\n\n");
-    fprintf(dump_file_pointer, "\tknot_%d [ style=filled, fillcolor=\"#FFC0C0\",  label=\"{ <data> data %ld | { <left> left %ld | <right> right %ld }} \"];\n", i, current_node->data, left, right);
-    fprintf(dump_file_pointer, "}");
+    fprintf(df_ptr, "\tknot_%d [ style=filled, fillcolor=\"#FFC0C0\",  label=\"{ <data> data %ld | { <left> left %ld | <right> right %ld }} \"];\n", level, current_node->data, left, right);
 
-    system("dot -Tsvg dump.dot -o dump_comp.svg");
     return TREE_SUCCESS;
 }
 
-tree_errors_e tree_dump(tree_node_s *current_node) {
+tree_errors_e tree_dump(tree_node_s *current_node, FILE *df_ptr, int level) {
+    assert(current_node && "Error in tree dump - zero pointer input\n");
+    assert(df_ptr && "Wrong pointer to file for dump\n");
+
+    if (current_node->left != NULL) {
+        tree_errors_e inside_result = tree_dump(current_node->left, df_ptr, level++);
+        if (inside_result != TREE_SUCCESS) {
+            fprintf(stderr, "ERROR: troubles in reqursion tree_dump\n\ttXlib соболезнует...\n");
+            return TREE_DUMP_TROUBLE;
+        } 
+    }
+    else if (current_node->right != NULL) {
+        tree_errors_e inside_result = tree_dump(current_node->right, df_ptr, level++);
+        if (inside_result != TREE_SUCCESS) {
+            fprintf(stderr, "ERROR: troubles in reqursion tree_dump left undertree\n\ttXlib соболезнует...\n");
+            return TREE_DUMP_TROUBLE;
+        }
+    }
+    else if (current_node->left == NULL && current_node->right == NULL) {
+        tree_errors_e res_dump = one_node_dump(current_node, df_ptr ,level);
+        return res_dump;
+    }
+
+    tree_errors_e res_dump = one_node_dump(current_node, df_ptr, level);
+    return res_dump;
+}
+
+
+tree_errors_e wrap_tree_dump(tree_node_s *current_node) {
     assert(current_node && "Error in tree dump - zero pointer input");
 
-    FILE *dump_file_pointer = fopen(DUMP_FILE_NAME, "a");
-    if (dump_file_pointer == NULL) {
+    FILE *df_ptr = fopen(DUMP_FILE_NAME, "a");
+    if (df_ptr == NULL) {
         fprintf(stderr, "ERROR: did not open file for graph dump\n");
         return TREE_OPEN_FILE_TROUBLE;
     }
-    fprintf("digraph {")
+
+    int level = 1;
+    fprintf(df_ptr, "digraph{\n\trankdir=TB;\n\tnode [shape=Mrecord];\n\n");
+
+    tree_errors_e inside_result = tree_dump(current_node, df_ptr, level);
+    if (inside_result != TREE_SUCCESS) {
+        fprintf(stderr, "ERROR: troubles in reqursion tree_dump left undertree\n\ttXlib соболезнует...\n\tIn wrap_tree_dump\n");
+        return TREE_DUMP_TROUBLE;
+    }
+
+    fprintf(df_ptr, "}");
+
+    system("dot -Tsvg dump.dot -o dump_comp.svg");
+    return TREE_SUCCESS;
 }

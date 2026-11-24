@@ -20,6 +20,7 @@ typedef enum {
     TREE_LINKING_TROUBLE,
     TREE_DELETE_TROUBLE,
     TREE_OPEN_FILE_TROUBLE,
+    TREE_DUMP_TROUBLE,
 } tree_errors_e;
 
 tree_node_s * tree_node_init(long int data, tree_node_s *parent);
@@ -28,9 +29,11 @@ tree_errors_e link_right_node(long int data, tree_node_s *parent);
 tree_errors_e link_left_node(long int data, tree_node_s *parent);
 tree_errors_e delete_tree(tree_node_s *root);
 tree_errors_e create_new_node(long int data_for_new_node, tree_node_s *root);
+tree_errors_e node_dump(tree_node_s *current_node);//NOTE: use to dump only 1 node and nothing else
 // tree_errors_e add_node(int data, tree_node_s *root);
-tree_errors_e node_dump(tree_node_s *current_node);
-tree_errors_e tree_dump(tree_node_s *current_node);
+tree_errors_e one_node_dump(tree_node_s *current_node, FILE *df_ptr, int line); 
+tree_errors_e tree_dump(tree_node_s *current_node, FILE *df_ptr, int line);
+tree_errors_e wrap_tree_dump(tree_node_s *current_node);
 
 tree_node_s error_node_CONST = {
             .data = 2989,

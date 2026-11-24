@@ -1,6 +1,7 @@
-digraph {
+digraph{
 	rankdir=TB;
 	node [shape=Mrecord];
 
-	knot_1 [ style=filled, fillcolor="#FFC0C0",  label="{ <data> data 50 | { <left> left 0 | <right> right 0 }} "];
+	knot_1 [ style=filled, fillcolor="#FFC0C0",  label="{ <data> data 30 | { <left> left 0 | <right> right 0 }} "];
+	knot_2 [ style=filled, fillcolor="#FFC0C0",  label="{ <data> data 50 | { <left> left 0 | <right> right 30 }} "];
 }
