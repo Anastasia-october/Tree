@@ -2,6 +2,43 @@ digraph{
 	rankdir=TB;
 	node [shape=Mrecord];
 
-	knot_1 [ style=filled, fillcolor="#FFC0C0",  label="{ <data> data 30 | { <left> left 0 | <right> right 0 }} "];
-	knot_2 [ style=filled, fillcolor="#FFC0C0",  label="{ <data> data 50 | { <left> left 0 | <right> right 30 }} "];
+	knot_3 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 3 | { <left> left 0 | <right> right 0 }} "];
+	knot_3 -> knot_16;
+
+	knot_16 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 16 | { <left> left 3 | <right> right 0 }} "];
+	knot_16 -> knot_20;
+
+	knot_36 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 36 | { <left> left 0 | <right> right 0 }} "];
+	knot_36 -> knot_33;
+
+	knot_33 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 33 | { <left> left 0 | <right> right 36 }} "];
+	knot_33 -> knot_20;
+
+	knot_20 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 20 | { <left> left 16 | <right> right 33 }} "];
+	knot_20 -> knot_47;
+
+	knot_50 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 50 | { <left> left 0 | <right> right 0 }} "];
+	knot_50 -> knot_47;
+
+	knot_47 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 47 | { <left> left 20 | <right> right 50 }} "];
+	knot_47 -> knot_50;
+
+	knot_59 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 59 | { <left> left 0 | <right> right 0 }} "];
+	knot_59 -> knot_60;
+
+	knot_89 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 89 | { <left> left 0 | <right> right 0 }} "];
+	knot_89 -> knot_91;
+
+	knot_91 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 91 | { <left> left 89 | <right> right 0 }} "];
+	knot_91 -> knot_69;
+
+	knot_69 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 69 | { <left> left 0 | <right> right 91 }} "];
+	knot_69 -> knot_60;
+
+	knot_60 [ style=filled, fillcolor="#C0FFC0",  label="{ <data> data 60 | { <left> left 59 | <right> right 69 }} "];
+	knot_60 -> knot_50;
+
+	knot_50 [ style=filled, fillcolor="#C0FFFF",  label="{ <data> data 50 | { <left> left 47 | <right> right 60 }} "];
+	knot_50 -> knot_0;
+
 }

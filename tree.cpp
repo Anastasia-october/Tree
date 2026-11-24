@@ -7,25 +7,54 @@ int main() {
     root->parent = NULL;
     root->right = NULL;
     
-    tree_node_s *current = root;
+    // tree_node_s *current = root;
 
-    long int data_for_new_node = 30;
+    long int data_for_new_node = 47;
 
     tree_errors_e res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 60;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 20;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 33;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 69;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 59;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node =36;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 16;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 3;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 91;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 89;
+    res_making_new_node = create_new_node(data_for_new_node, root);
+
+    data_for_new_node = 50;
+    res_making_new_node = create_new_node(data_for_new_node, root);
     
-    node_dump(current);
-    current = root->right;
-    node_dump(current);
-    printf("parent %p, data %ld\n", current->parent, current->data);
     printf("A\n");
-    if (res_making_new_node != 0) {
-        fprintf(stderr, "ERROR truble with making new node\n\tin main\n");
-    }
     
     tree_errors_e res_tree_dump = wrap_tree_dump(root);
     if (res_tree_dump != TREE_SUCCESS) {
         fprintf(stderr, "ERROR trouble with tree dump");
     }
+
+    int res_system = system("dot -Tsvg dump.dot -o dump_comp.svg");
+    printf("res system %d\n", res_system);
 
     tree_errors_e result = delete_tree(root);
     if (result != TREE_SUCCESS) {
@@ -90,7 +119,7 @@ tree_errors_e   link_right_node(long int data, tree_node_s *current_node) {
 }
 
 tree_errors_e   link_left_node(long int data, tree_node_s *current_node) {
-    assert(current_node->parent && "wrong parent pointer");
+    //assert(current_node->parent && "wrong parent pointer");
 
     tree_node_s *created_node = tree_node_init(data, current_node);
     if (created_node->data == 2989) {
@@ -129,7 +158,7 @@ tree_errors_e   create_new_node(long int data_for_new_node, tree_node_s *current
     tree_errors_e res_link = TREE_SUCCESS;
 
     while (f == 0) {
-        if (data_for_new_node > current->data) {
+        if (data_for_new_node <= current->data) {
             if (current->left != NULL) {
                 current = current->left;
             }
@@ -159,8 +188,9 @@ tree_errors_e   create_new_node(long int data_for_new_node, tree_node_s *current
 }
 
 tree_errors_e node_dump(tree_node_s *current_node) {
-    FILE *dump_file_pointer = fopen(DUMP_FILE_NAME, "w");
+    assert(current_node && "zero pointer to current_node\n");
 
+    FILE *dump_file_pointer = fopen(DEBUG_FILE_NAME, "a");
     if (dump_file_pointer == NULL) {
         fprintf(stderr, "ERROR truble with openning dump file\n\tin node_dump\n");
         return TREE_POINTERS_TRUBBLE;
@@ -215,8 +245,15 @@ tree_errors_e one_node_dump(tree_node_s *current_node, FILE *df_ptr, int level) 
     else {
         right = 0;
     }
-
-    fprintf(df_ptr, "\tknot_%d [ style=filled, fillcolor=\"#FFC0C0\",  label=\"{ <data> data %ld | { <left> left %ld | <right> right %ld }} \"];\n", level, current_node->data, left, right);
+    if (current_node->parent != NULL) {
+        fprintf(df_ptr, "\tknot_%ld [ style=filled, fillcolor=\"#C0FFC0\",  label=\"{ <data> data %ld | { <left> left %ld | <right> right %ld }} \"];\n", current_node->data, current_node->data, left, right);
+        fprintf(df_ptr, "\tknot_%ld -> knot_%ld;\n\n", current_node->data, current_node->parent->data);
+    }
+    else {
+        long int zero = 0;
+        fprintf(df_ptr, "\tknot_%ld [ style=filled, fillcolor=\"#C0FFFF\",  label=\"{ <data> data %ld | { <left> left %ld | <right> right %ld }} \"];\n", current_node->data, current_node->data, left, right);
+        fprintf(df_ptr, "\tknot_%ld -> knot_%ld;\n\n", current_node->data, zero);
+    }
 
     return TREE_SUCCESS;
 }
@@ -225,6 +262,8 @@ tree_errors_e tree_dump(tree_node_s *current_node, FILE *df_ptr, int level) {
     assert(current_node && "Error in tree dump - zero pointer input\n");
     assert(df_ptr && "Wrong pointer to file for dump\n");
 
+    fprintf(stderr, "wetn into tree_dump with node %ld\n", current_node->data);
+
     if (current_node->left != NULL) {
         tree_errors_e inside_result = tree_dump(current_node->left, df_ptr, level++);
         if (inside_result != TREE_SUCCESS) {
@@ -232,25 +271,28 @@ tree_errors_e tree_dump(tree_node_s *current_node, FILE *df_ptr, int level) {
             return TREE_DUMP_TROUBLE;
         } 
     }
-    else if (current_node->right != NULL) {
+    if (current_node->right != NULL) {
         tree_errors_e inside_result = tree_dump(current_node->right, df_ptr, level++);
         if (inside_result != TREE_SUCCESS) {
             fprintf(stderr, "ERROR: troubles in reqursion tree_dump left undertree\n\ttXlib соболезнует...\n");
             return TREE_DUMP_TROUBLE;
         }
     }
-    else if (current_node->left == NULL && current_node->right == NULL) {
-        tree_errors_e res_dump = one_node_dump(current_node, df_ptr ,level);
+    if (current_node->left == NULL && current_node->right == NULL) {
+        tree_errors_e res_dump = one_node_dump(current_node, df_ptr, level++);
         return res_dump;
     }
 
-    tree_errors_e res_dump = one_node_dump(current_node, df_ptr, level);
+    tree_errors_e res_dump = one_node_dump(current_node, df_ptr, level++);
     return res_dump;
 }
 
 
 tree_errors_e wrap_tree_dump(tree_node_s *current_node) {
     assert(current_node && "Error in tree dump - zero pointer input");
+
+    FILE *clear_pointer = fopen(DUMP_FILE_NAME, "w");//NOTE: clear file
+    fclose(clear_pointer);
 
     FILE *df_ptr = fopen(DUMP_FILE_NAME, "a");
     if (df_ptr == NULL) {
@@ -269,6 +311,8 @@ tree_errors_e wrap_tree_dump(tree_node_s *current_node) {
 
     fprintf(df_ptr, "}");
 
-    system("dot -Tsvg dump.dot -o dump_comp.svg");
+    int res_system = system("dot -Tsvg dump.dot -o dump_comp.svg");
+    printf("res system %d\n", res_system);
+    fclose(df_ptr);
     return TREE_SUCCESS;
 }

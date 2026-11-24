@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 #define DUMP_FILE_NAME "dump.dot"
+#define DEBUG_FILE_NAME "debug_dump_file.dot"
+
 
 struct tree_node_s{
     long int data;
