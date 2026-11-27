@@ -48,7 +48,7 @@ int main() {
     
     printf("A\n");
     
-    tree_errors_e res_tree_dump = wrap_tree_dump(root);
+    tree_errors_e res_tree_dump = wrap_graph_tree_dump(root);
     if (res_tree_dump != TREE_SUCCESS) {
         fprintf(stderr, "ERROR trouble with tree dump");
     }
@@ -132,7 +132,7 @@ tree_errors_e   link_left_node(long int data, tree_node_s *current_node) {
     return TREE_SUCCESS;
 }
 
-tree_errors_e delete_tree(tree_node_s *current){
+tree_errors_e delete_tree(tree_node_s *current) {
     assert(current);
 
     while (current->left != NULL || current->right != NULL) {
@@ -258,23 +258,23 @@ tree_errors_e one_node_dump(tree_node_s *current_node, FILE *df_ptr, int level) 
     return TREE_SUCCESS;
 }
 
-tree_errors_e tree_dump(tree_node_s *current_node, FILE *df_ptr, int level) {
+tree_errors_e tree_graph_dump(tree_node_s *current_node, FILE *df_ptr, int level) {
     assert(current_node && "Error in tree dump - zero pointer input\n");
     assert(df_ptr && "Wrong pointer to file for dump\n");
 
-    fprintf(stderr, "wetn into tree_dump with node %ld\n", current_node->data);
+    fprintf(stderr, "wetn into tree_graph_dump with node %ld\n", current_node->data);
 
     if (current_node->left != NULL) {
-        tree_errors_e inside_result = tree_dump(current_node->left, df_ptr, level++);
+        tree_errors_e inside_result = tree_graph_dump(current_node->left, df_ptr, level++);
         if (inside_result != TREE_SUCCESS) {
-            fprintf(stderr, "ERROR: troubles in reqursion tree_dump\n\ttXlib соболезнует...\n");
+            fprintf(stderr, "ERROR: troubles in reqursion tree_graph_dump\n\ttXlib соболезнует...\n");
             return TREE_DUMP_TROUBLE;
         } 
     }
     if (current_node->right != NULL) {
-        tree_errors_e inside_result = tree_dump(current_node->right, df_ptr, level++);
+        tree_errors_e inside_result = tree_graph_dump(current_node->right, df_ptr, level++);
         if (inside_result != TREE_SUCCESS) {
-            fprintf(stderr, "ERROR: troubles in reqursion tree_dump left undertree\n\ttXlib соболезнует...\n");
+            fprintf(stderr, "ERROR: troubles in reqursion tree_graph_dump left undertree\n\ttXlib соболезнует...\n");
             return TREE_DUMP_TROUBLE;
         }
     }
@@ -287,14 +287,13 @@ tree_errors_e tree_dump(tree_node_s *current_node, FILE *df_ptr, int level) {
     return res_dump;
 }
 
-
-tree_errors_e wrap_tree_dump(tree_node_s *current_node) {
+tree_errors_e wrap_graph_tree_dump(tree_node_s *current_node) {
     assert(current_node && "Error in tree dump - zero pointer input");
 
-    FILE *clear_pointer = fopen(DUMP_FILE_NAME, "w");//NOTE: clear file
+    FILE *clear_pointer = fopen(GRAPH_DUMP_FILE_NAME, "w");//NOTE: clear file
     fclose(clear_pointer);
 
-    FILE *df_ptr = fopen(DUMP_FILE_NAME, "a");
+    FILE *df_ptr = fopen(GRAPH_DUMP_FILE_NAME, "a");
     if (df_ptr == NULL) {
         fprintf(stderr, "ERROR: did not open file for graph dump\n");
         return TREE_OPEN_FILE_TROUBLE;
@@ -303,9 +302,9 @@ tree_errors_e wrap_tree_dump(tree_node_s *current_node) {
     int level = 1;
     fprintf(df_ptr, "digraph{\n\trankdir=TB;\n\tnode [shape=Mrecord];\n\n");
 
-    tree_errors_e inside_result = tree_dump(current_node, df_ptr, level);
+    tree_errors_e inside_result = tree_graph_dump(current_node, df_ptr, level);
     if (inside_result != TREE_SUCCESS) {
-        fprintf(stderr, "ERROR: troubles in reqursion tree_dump left undertree\n\ttXlib соболезнует...\n\tIn wrap_tree_dump\n");
+        fprintf(stderr, "ERROR: troubles in reqursion tree_graph_dump left undertree\n\ttXlib соболезнует...\n\tIn wrap_graph_tree_dump\n");
         return TREE_DUMP_TROUBLE;
     }
 
@@ -316,3 +315,52 @@ tree_errors_e wrap_tree_dump(tree_node_s *current_node) {
     fclose(df_ptr);
     return TREE_SUCCESS;
 }
+
+tree_errors_e tree_text_dump(tree_node_s *current_node, FILE *tdf_ptr) {
+    assert(current_node && "Error: zero pointer to current node\n\tIn tree_text_dump\n");
+
+    fprintf(tdf_ptr, "( %ld ", current_node->data);
+
+    if (current_node->left != NULL) {
+        tree_errors_e res__text_dump_inside = tree_text_dump(current_node->left, tdf_ptr);
+        if (res__text_dump_inside != TREE_SUCCESS) {
+            fprintf(stderr, "ERROR: not succes result\n\tIn tree_text_dump left undertree\n");
+            return TREE_DUMP_TROUBLE;
+        }
+        fprintf(tdf_ptr, ") ");
+    }
+
+     if (current_node->right != NULL) {
+        tree_errors_e res__text_dump_inside = tree_text_dump(current_node->right, tdf_ptr);
+        if (res__text_dump_inside != TREE_SUCCESS) {
+            fprintf(stderr, "ERROR: not succes result\n\tIn tree_text_dump right undertree\n");
+            return TREE_DUMP_TROUBLE;
+        }
+        fprintf(tdf_ptr, ") ");
+    }
+
+    if (current_node->left == NULL && current_node->right == NULL) {
+        fprintf(tdf_ptr, ") ");
+        return TREE_SUCCESS;
+    }
+
+    return TREE_DUMP_TROUBLE;
+}
+
+tree_errors_e wrap_text_tree_dump(tree_node_s *current_node) {
+    assert(current_node && "Error: zero pointer to current node\n\tIn wrap_text_tree_dump\n");
+
+    FILE *tdf_ptr = fopen(TEXT_DUMP_FILE_NAME, "a");
+    if (tdf_ptr == NULL) {
+        fprintf(stderr, "ERROR: zero poiner to file for text dump\n\tIn tree_text_dump\n");
+        return TREE_OPEN_FILE_TROUBLE;
+    }
+
+    fprintf(tdf_ptr, "Dump tree\n"); //TODO: add time file etc.
+
+    tree_text_dump(current_node, tdf_ptr);
+
+    fclose(tdf_ptr);
+    return TREE_SUCCESS;
+}
+

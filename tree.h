@@ -2,8 +2,9 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#define DUMP_FILE_NAME "dump.dot"
+#define GRAPH_DUMP_FILE_NAME "dump.dot"
 #define DEBUG_FILE_NAME "debug_dump_file.dot"
+#define TEXT_DUMP_FILE_NAME "dump.txt"
 
 
 struct tree_node_s{
@@ -34,8 +35,10 @@ tree_errors_e create_new_node(long int data_for_new_node, tree_node_s *root);
 tree_errors_e node_dump(tree_node_s *current_node);//NOTE: use to dump only 1 node and nothing else
 // tree_errors_e add_node(int data, tree_node_s *root);
 tree_errors_e one_node_dump(tree_node_s *current_node, FILE *df_ptr, int line); 
-tree_errors_e tree_dump(tree_node_s *current_node, FILE *df_ptr, int line);
-tree_errors_e wrap_tree_dump(tree_node_s *current_node);
+tree_errors_e tree_graph_dump(tree_node_s *current_node, FILE *df_ptr, int line);
+tree_errors_e wrap_graph_tree_dump(tree_node_s *current_node);
+tree_errors_e tree_text_dump(tree_node_s *current_node, FILE *tdf_ptr);
+tree_errors_e wrap_text_tree_dump(tree_node_s *current_node);
 
 tree_node_s error_node_CONST = {
             .data = 2989,
